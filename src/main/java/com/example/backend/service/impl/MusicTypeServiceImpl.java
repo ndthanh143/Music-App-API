@@ -43,6 +43,7 @@ public class MusicTypeServiceImpl implements MusicTypeService {
         musicType = new MusicType();
         musicType.setName(dto.getName());
         musicType.setThumbnail(thumbnail.getBytes());
+        repo.save(musicType);
         return musicType;
     }
 
