@@ -37,7 +37,7 @@ import java.util.Set;
 
 @Slf4j
 @RestController
-@RequestMapping("/res/login")
+@RequestMapping("/rest/login")
 public class AuthenticationController {
     private final AuthenticationManager authenticationManager;
 

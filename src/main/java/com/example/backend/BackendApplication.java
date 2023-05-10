@@ -24,7 +24,7 @@ public class BackendApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        if(userRepository.count()==1) {
+        if(userRepository.count()==0) {
             User taiKhoan = new User("Le Hai", "haile2002@gmail.com", "123456", "034789456", Arrays.asList(ERole.ROLE_USER.name()));
             userRepository.save(taiKhoan);
         }
