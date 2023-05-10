@@ -3,9 +3,12 @@ package com.example.backend.securities;
 import com.example.backend.model.User;
 import com.example.backend.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -29,7 +32,7 @@ public class CustomUserDetailsService implements UserDetailsService {
                 taiKhoan.getName(),
                 taiKhoan.getEmail(),
                 taiKhoan.getPassword(),
-                taiKhoan.getAuthorities(),
+                taiKhoan.getRoles().stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList()),
                 taiKhoan.isTrangThai()
         );
     }

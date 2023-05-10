@@ -1,14 +1,15 @@
 package com.example.backend.controller;
 
+import com.example.backend.dto.AccountDTO;
 import com.example.backend.dto.TokenDetails;
 import com.example.backend.dto.UserDTO;
 import com.example.backend.exception.InvalidException;
 import com.example.backend.exception.UserNotFoundAuthenticationException;
-import com.example.backend.model.Role;
+//import com.example.backend.model.Role;
 import com.example.backend.model.User;
-import com.example.backend.repository.RoleRepository;
+//import com.example.backend.repository.RoleRepository;
 import com.example.backend.repository.UserRepository;
-import com.example.backend.respone.MessageResponse;
+//import com.example.backend.respone.MessageResponse;
 import com.example.backend.securities.CustomUserDetailsService;
 import com.example.backend.securities.JwtTokenUtils;
 import com.example.backend.securities.JwtUserDetails;
@@ -36,7 +37,7 @@ import java.util.Set;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/res/login")
 public class AuthenticationController {
     private final AuthenticationManager authenticationManager;
 
@@ -46,13 +47,13 @@ public class AuthenticationController {
     @Autowired
     UserRepository userRepository;
 
-    @Autowired
-    RoleRepository roleRepository;
+//    @Autowired
+//    RoleRepository roleRepository;
 
-    @Autowired
-    PasswordEncoder encoder;
+//    @Autowired
+//    PasswordEncoder encoder;
 
-    @Value("/login/${google.verifyUrl}")
+    @Value("/${google.verifyUrl}")
     private String googleVerifyUrl;
 
     private final RestTemplate restTemplate = new RestTemplate();
@@ -64,10 +65,10 @@ public class AuthenticationController {
         this.jwtTokenUtils = jwtTokenUtils;
     }
 
-    @PostMapping("/login")
-    public ResponseEntity<TokenDetails> login(@Validated @RequestBody UserDTO dto) {
+    @PostMapping
+    public ResponseEntity<TokenDetails> login(@Validated @RequestBody AccountDTO dto) {
         UserAuthenticationToken authenticationToken = new UserAuthenticationToken(
-                dto.getEmail(),
+                dto.getUsername(),
                 dto.getPassword(),
                 true
         );
@@ -79,9 +80,9 @@ public class AuthenticationController {
             System.out.println(ex.getMessage());
         }
         final JwtUserDetails userDetails = customUserDetailsService
-                .loadUserByUsername(dto.getEmail());
+                .loadUserByUsername(dto.getUsername());
         final TokenDetails result = jwtTokenUtils.getTokenDetails(userDetails,null);
-        log.info(String.format("User %s login at %s", dto.getEmail(), new Date()));
+        log.info(String.format("User %s login at %s", dto.getUsername(), new Date()));
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
@@ -113,61 +114,6 @@ public class AuthenticationController {
         final TokenDetails result = jwtTokenUtils.getTokenDetails(userDetails, avatar);
         log.info(String.format("User %s login via google at %s", email, new Date()));
         return new ResponseEntity<>(result, HttpStatus.OK);
-    }
-    @PostMapping("/signup")
-    public ResponseEntity<?> registerUser(@Validated @RequestBody UserDTO signUpRequest) {
-        if (userRepository.existsByUsername(signUpRequest.getName())) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse("Error: Username is already taken!"));
-        }
-
-        if (userRepository.kiemtraEmail(signUpRequest.getEmail())) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse("Error: Email is already in use!"));
-        }
-
-        // Create new user's account
-        User user = new User(signUpRequest.getName(),
-                signUpRequest.getEmail(),
-                encoder.encode(signUpRequest.getPassword()),
-                signUpRequest.getPhone());
-
-        Set<String> strRoles = signUpRequest.getRoles();
-        Set<Role> roles = new HashSet<>();
-
-        if (strRoles == null) {
-            Role userRole = roleRepository.findByName(ERole.ROLE_USER)
-                    .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-            roles.add(userRole);
-        } else {
-            strRoles.forEach(role -> {
-                switch (role) {
-                    case "admin":
-                        Role adminRole = roleRepository.findByName(ERole.ROLE_ADMIN)
-                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                        roles.add(adminRole);
-
-                        break;
-                    case "mod":
-                        Role modRole = roleRepository.findByName(ERole.ROLE_GUEST)
-                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                        roles.add(modRole);
-
-                        break;
-                    default:
-                        Role userRole = roleRepository.findByName(ERole.ROLE_USER)
-                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                        roles.add(userRole);
-                }
-            });
-        }
-
-        user.setRole((Role) roles);
-        userRepository.save(user);
-
-        return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
 
 
