@@ -8,7 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-@CrossOrigin("http://localhost:8080")
 @RestController
 @RequestMapping("/api/v1/tai-khoan")
 public class TaiKhoanController {
